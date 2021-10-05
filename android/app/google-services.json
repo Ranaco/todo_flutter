@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "330397229738",
+    "project_id": "todo-firebase-astara",
+    "storage_bucket": "todo-firebase-astara.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:330397229738:android:c2c39a00c2f62dd78066d3",
+        "android_client_info": {
+          "package_name": "com.astara.todo_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "330397229738-0nrp62pdaajldhpbkf2irukcandsj5pc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgapvAnXLJDHdI8B3dhaQQ5am_seplNLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "330397229738-0nrp62pdaajldhpbkf2irukcandsj5pc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
