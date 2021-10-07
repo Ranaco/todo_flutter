@@ -26,7 +26,10 @@ class _SignInState extends State<SignIn> {
     _auth.authStateChanges().listen((User? event) {
       if (event != null) {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return HomePage();
+          return HomePage(
+            title: '',
+            desc: '',
+          );
         }));
       }
     });
@@ -59,135 +62,145 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Sign In',
-          style: TextStyle(
-              color: Colors.black, fontSize: 25, fontWeight: FontWeight.w500),
+    return WillPopScope(
+      onWillPop: () async {
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Sign In',
+            style: TextStyle(
+                color: Colors.black, fontSize: 25, fontWeight: FontWeight.w500),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 10,
+          centerTitle: true,
         ),
-        backgroundColor: Colors.white,
-        elevation: 10,
-        centerTitle: true,
-      ),
-      body: Form(
-        autovalidateMode: _autoValidate,
-        key: _formKey,
-        child: Center(
-          child: SingleChildScrollView(
-              child: Card(
-            elevation: 20,
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage('assets/images/logo.jpg'),
-                        fit: BoxFit.fill),
+        body: Form(
+          autovalidateMode: _autoValidate,
+          key: _formKey,
+          child: Center(
+            child: SingleChildScrollView(
+                child: Card(
+              elevation: 20,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 20,
                   ),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                ListTile(
-                  leading: Icon(Icons.person),
-                  title: TextFormField(
-                    validator: (email) {
-                      if (email!.isEmpty || email.length < 6) {
-                        return "Email is incorrect";
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Enter your email',
-                      labelText: "Email",
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage('assets/images/logo.jpg'),
+                          fit: BoxFit.fill),
                     ),
-                    onChanged: (email) {
-                      _email = email;
-                    },
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                ListTile(
-                  leading: Icon(Icons.password),
-                  title: TextFormField(
-                    validator: (password) {
-                      if (password!.isEmpty || password.length < 6) {
-                        return "Incorrect password";
-                      }
-                    },
-                    onChanged: (password) {
-                      _password = password;
-                    },
-                    decoration: InputDecoration(
-                        hintText: 'Password', labelText: 'Password'),
-                    obscureText: true,
+                  SizedBox(
+                    height: 30,
                   ),
-                ),
-                SizedBox(
-                  height: 50,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    print(_email + " " + _password);
+                  ListTile(
+                    leading: Icon(Icons.person),
+                    title: TextFormField(
+                      validator: (email) {
+                        if (email!.isEmpty || email.length < 6) {
+                          return "Email is incorrect";
+                        }
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Enter your email',
+                        labelText: "Email",
+                      ),
+                      onChanged: (email) {
+                        _email = email;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.password),
+                    title: TextFormField(
+                      validator: (password) {
+                        if (password!.isEmpty || password.length < 6) {
+                          return "Incorrect password";
+                        }
+                      },
+                      onChanged: (password) {
+                        _password = password;
+                      },
+                      decoration: InputDecoration(
+                          hintText: 'Password', labelText: 'Password'),
+                      obscureText: true,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      print(_email + " " + _password);
 
-                    _TakeToNextScreen();
-                  },
-                  child: Text(
-                    'Sign In',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                      elevation: 10,
-                      primary: Colors.grey.shade300,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)))),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text("Don't have an account?"),
-                    SizedBox(
-                      width: 10,
+                      _takeToNextScreen();
+                    },
+                    child: Text(
+                      'Sign In',
+                      style: TextStyle(color: Colors.black),
                     ),
-                    GestureDetector(
-                        onTap: _takeToSignUp,
-                        child: Container(
-                          child: Text(
-                            'Sign Up!',
-                            style: TextStyle(color: Colors.blue),
-                          ),
-                        ))
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                )
-              ],
-            ),
-          )),
+                    style: ElevatedButton.styleFrom(
+                        elevation: 10,
+                        primary: Colors.grey.shade300,
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30)))),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text("Don't have an account?"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                          onTap: _takeToSignUp,
+                          child: Container(
+                            child: Text(
+                              'Sign Up!',
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                          ))
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  )
+                ],
+              ),
+            )),
+          ),
         ),
       ),
     );
   }
 
-  _TakeToNextScreen() async {
+  _takeToNextScreen() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       await _auth
           .signInWithEmailAndPassword(email: _email, password: _password)
           .then((uid) => {
-                Fluttertoast.showToast(msg: "login successful"),
-                Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => HomePage()))
+                Fluttertoast.showToast(
+                    msg: "login successful", backgroundColor: Colors.white),
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => HomePage(
+                          title: '',
+                          desc: '',
+                        )))
               })
           .catchError((e) {
         Fluttertoast.showToast(msg: 'The account is not registered.');
