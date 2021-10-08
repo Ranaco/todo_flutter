@@ -1,9 +1,23 @@
+// ignore_for_file: unused_import
+
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '/data/models/note_model.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:todo_flutter/CRUDoperaiton.dart';
+import 'package:todo_flutter/main.dart';
 import 'LogIn.dart';
 import 'EditingPage.dart';
+import '';
 import 'dart:async';
+
+final CollectionReference _collectionReference =
+    FirebaseFirestore.instance.collection('users');
 
 class HomePage extends StatefulWidget {
   final String title;
@@ -17,9 +31,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  bool isLoading = true;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  CollectionReference _col = FirebaseFirestore.instance.collection('notes');
+  User? user = FirebaseAuth.instance.currentUser;
+
+  List<Note> notesData = [];
+
+  var docs;
+
+//
+  getData() async {
+    print("test");
+    CrudFireStore _crud = CrudFireStore();
+    notesData = await _crud.readNote();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  deleteRow(int index) {
+    final docId = _firestore.collection('notes').doc().id[index.toInt()];
+
+    _firestore.collection('notes').doc(docId).delete();
+  }
+
+// msg me on discord if any help is needed ok
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   var i = 5;
 
@@ -34,12 +72,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  String _search = "";
-  String searchres = "";
+//TODO: complete the crud class;
 
+  String _search = ""; //can you print somedata on the console
+  String searchres = "";
   @override
   initState() {
     super.initState();
+    getData();
+    // getUsers();
     checkLogin();
   }
 
@@ -89,38 +130,68 @@ class _HomePageState extends State<HomePage> {
               shape: ContinuousRectangleBorder(
                   borderRadius: BorderRadius.vertical(
                       bottom: Radius.elliptical(400, 900)))),
-          SliverList(
-            delegate:
-                SliverChildBuilderDelegate((BuildContext context, int index) {
-              return Dismissible(
-                onDismissed: (left) {
-                  setState(() {});
+          if (isLoading)
+            SliverToBoxAdapter(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return Dismissible(
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (left) {
+                      deleteRow(index);
+                    },
+                    key: UniqueKey(),
+                    background: Container(
+                      color: Colors.grey.shade400,
+                      child: Icon(Icons.delete),
+                    ),
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddOrEdit(
+                                  add: 'Save',
+                                  header: 'Edit Note',
+                                  del: 1,
+                                ),
+                              ));
+                        },
+                        child: Center(
+                          child: SizedBox(
+                              height: MediaQuery.of(context).size.width * 0.3,
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              child: Card(
+                                elevation: 20,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    ListTile(
+                                      title: Center(
+                                        child: Text(
+                                            notesData.toList()[index].title),
+                                      ),
+                                      subtitle:
+                                          Text(notesData.toList()[index].desc),
+                                      isThreeLine: true,
+                                      visualDensity: VisualDensity.comfortable,
+                                    )
+                                  ],
+                                ),
+                              )),
+                        )),
+                  );
                 },
-                key: UniqueKey(),
-                background: Container(
-                  color: Colors.grey.shade400,
-                  child: Icon(Icons.delete),
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddOrEdit(
-                            add: 'Save',
-                            title: 'Edit Note',
-                            del: 1,
-                          ),
-                        ));
-                  },
-                  child: ListTile(
-                    title: Center(child: Text(searchres)),
-                    subtitle: Center(child: Text('Roll')),
-                  ),
-                ),
-              );
-            }, childCount: 4),
-          ),
+                childCount: notesData.length,
+              ),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -130,7 +201,7 @@ class _HomePageState extends State<HomePage> {
               MaterialPageRoute(
                   builder: (context) => AddOrEdit(
                         add: 'Create',
-                        title: 'Create New!',
+                        header: 'Create New!',
                         del: 0,
                       )));
         },

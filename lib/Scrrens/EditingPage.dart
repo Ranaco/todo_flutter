@@ -1,17 +1,17 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:todo_flutter/CRUDoperaiton.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AddOrEdit extends StatefulWidget {
-  final String title;
+  final String header;
   final int del;
   final String add;
   const AddOrEdit({
     Key? key,
-    required this.title,
+    required this.header,
     required this.del,
     required this.add,
   }) : super(key: key);
@@ -28,30 +28,33 @@ class _AddOrEditState extends State<AddOrEdit> {
 
   Map<String, dynamic> userInput = {};
 
+  CrudFireStore _crudFireStore = CrudFireStore();
+
   addDataToDb() {
-    CollectionReference _collectionReference =
-        FirebaseFirestore.instance.collection('notes');
-
     setState(() {
-      userInput[_title] = _description;
-    });
-
-    _collectionReference.add({
-      'title': _title,
-      'desc': _description,
-      'createdAt': DateTime.now(),
-      'uid': user!.uid,
+      CrudFireStore.addNote(
+        title: _title,
+        description: _description,
+        uid: user!.uid,
+      );
     });
     Navigator.pop(context);
   }
 
+  var docId;
+
   updateDb() async {
     CollectionReference _col = FirebaseFirestore.instance.collection('notes');
 
-    _col
-        .doc('UcWjfHHlSzEN7mPMTTEd')
-        .update({'title': _title, 'desc': _description}).then(
-            (value) => print('success'));
+    await _col.doc().update({
+      'title': _title,
+      'desc': _description,
+      'updatedAt': DateTime.now()
+    }).then((value) {
+      print('success');
+      Fluttertoast.showToast(msg: 'Created!');
+      Navigator.pop(context);
+    });
   }
 
   @override
@@ -102,7 +105,7 @@ class _AddOrEditState extends State<AddOrEdit> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    widget.title,
+                    widget.header,
                     style: GoogleFonts.allerta(
                       fontSize: 30,
                     ),
@@ -161,7 +164,7 @@ class _AddOrEditState extends State<AddOrEdit> {
                                         MainAxisAlignment.spaceEvenly,
                                     children: <Widget>[
                                       ElevatedButton(
-                                        onPressed: updateDb(),
+                                        onPressed: updateDb,
                                         child: Text(
                                           widget.add,
                                           style: TextStyle(color: Colors.black),
