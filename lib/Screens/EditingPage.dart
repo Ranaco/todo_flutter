@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:todo_flutter/CRUDoperaiton.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:todo_flutter/Screens/HomePage.dart';
+import 'package:todo_flutter/data/models/note_model.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class AddOrEdit extends StatefulWidget {
   final String header;
   final int del;
   final String add;
-  const AddOrEdit({
+  final Note? note;
+  final Function(Note) onUpdate;
+  AddOrEdit({
     Key? key,
+    required this.note,
+    required this.onUpdate,
     required this.header,
     required this.del,
     required this.add,
   }) : super(key: key);
 
-  @override
   _AddOrEditState createState() => _AddOrEditState();
 }
 
@@ -24,37 +31,40 @@ class _AddOrEditState extends State<AddOrEdit> {
   String _description = "";
   String _title = "";
 
-  User? user = FirebaseAuth.instance.currentUser;
+  CrudFireStore _crudFireStore = CrudFireStore();
 
   Map<String, dynamic> userInput = {};
 
-  CrudFireStore _crudFireStore = CrudFireStore();
+  FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
 
-  addDataToDb() {
-    setState(() {
-      CrudFireStore.addNote(
-        title: _title,
-        description: _description,
-        uid: user!.uid,
-      );
-    });
-    Navigator.pop(context);
-  }
-
-  var docId;
-
-  updateDb() async {
-    CollectionReference _col = FirebaseFirestore.instance.collection('notes');
-
-    await _col.doc().update({
-      'title': _title,
-      'desc': _description,
-      'updatedAt': DateTime.now()
-    }).then((value) {
-      print('success');
-      Fluttertoast.showToast(msg: 'Created!');
+  deleteDatabase() async {
+    _firebaseFirestore
+        .collection('notes')
+        .doc(widget.note!.docId)
+        .delete()
+        .then((value) {
       Navigator.pop(context);
     });
+  }
+
+  addDataToDb(Note note) async {
+    Note newNote = await CrudFireStore.addNote(note);
+    Navigator.pop(context);
+    widget.onUpdate(newNote);
+  }
+
+  updateDb(String title, String desc) async {
+    widget.note!.title = title;
+    widget.note!.desc = desc;
+    await CrudFireStore.updateNote(widget.note!);
+    widget.onUpdate(widget.note!);
+    Navigator.pushReplacement(
+        //another problem when the useer add data he returns to the homescreen but the data shown is updated only when he reloads the app how to make it happen at realtime? its simple, call a callback function onUpdate in the paramters of this class, there update the model by class you meant the model class that we made right?okay
+        context,
+        MaterialPageRoute(
+            builder: (context) => HomePage(
+                  email: '',
+                )));
   }
 
   @override
@@ -164,7 +174,12 @@ class _AddOrEditState extends State<AddOrEdit> {
                                         MainAxisAlignment.spaceEvenly,
                                     children: <Widget>[
                                       ElevatedButton(
-                                        onPressed: updateDb,
+                                        onPressed: () {
+                                          updateDb(
+                                            _title,
+                                            _description,
+                                          );
+                                        },
                                         child: Text(
                                           widget.add,
                                           style: TextStyle(color: Colors.black),
@@ -177,7 +192,9 @@ class _AddOrEditState extends State<AddOrEdit> {
                                                     BorderRadius.circular(10))),
                                       ),
                                       (ElevatedButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          deleteDatabase();
+                                        },
                                         child: Text(
                                           'Delete',
                                           style: TextStyle(color: Colors.black),
@@ -192,11 +209,19 @@ class _AddOrEditState extends State<AddOrEdit> {
                                     ],
                                   )
                                 : Row(
-                                    mainAxisAlignment:
+                                    mainAxisAlignment: //okay it is working but therre is some other bugs I that is because
                                         MainAxisAlignment.spaceEvenly,
                                     children: <Widget>[
                                         ElevatedButton(
-                                          onPressed: addDataToDb,
+                                          onPressed: () {
+                                            addDataToDb(Note(
+                                              //ENTER THE DATA HERE
+                                              desc: _description,
+                                              title: _title,
+                                              docId: null,
+                                              uid: user!.uid, //it looks fine
+                                            ));
+                                          },
                                           child: Text(
                                             widget.add,
                                             style:
@@ -209,7 +234,7 @@ class _AddOrEditState extends State<AddOrEdit> {
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           10))),
-                                        ),
+                                        )
                                       ]),
                           ]),
                     ),

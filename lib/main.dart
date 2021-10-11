@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'Scrrens/LogIn.dart';
+import 'Screens/LogIn.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-main(List<String> args) {
-  runApp((MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'Todo_firebase',
-    home: MyApp(),
-  )));
+main() {
+  runApp(
+    (MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Todo_firebase',
+      home: MyApp(),
+    )),
+  );
 }
 
 class MyApp extends StatelessWidget {
